@@ -118,6 +118,12 @@ Read and complete `model_card.md`:
 
 [**Model Card**](model_card.md)
 
+**My biggest learning:** Doubling energy weight (1.5 → 3.0) totally changed behavior without any warning. Small numbers have outsized impact. AI tools helped me identify filter bubble biases, but I verified the math manually using actual song data from `songs.csv`.
+
+**What surprised me:** Users feel the recommendations are "smart" even though it's just "find songs close to my energy." A simple explanation ("Perfect energy match") makes it feel intentional.
+
+**Next steps:** Add serendipity factor to break bubbles, test with real users on both versions, and build a profile detector to figure out what users actually care about (energy vs. genre vs. mood).
+
 Write 1 to 2 paragraphs here about what you learned:
 
 - about how recommenders turn data into predictions

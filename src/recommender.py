@@ -35,17 +35,17 @@ def score_song(song, user_prefs):
 	"""
 	score = 0.0
 	
-	# Genre match: +2.0
+	# Genre match: +1.0
 	if song['genre'] == user_prefs['genre']:
-		score += 2.0
-	
-	# Mood match: +1.0
-	if song['mood'] == user_prefs['mood']:
 		score += 1.0
 	
-	# Energy similarity: +0 to 1.5
+	# Mood match: +1.0
+	# if song['mood'] == user_prefs['mood']:
+	# 	score += 1.0
+	
+	# Energy similarity: +0 to 3.0
 	energy_diff = abs(song['energy'] - user_prefs['energy'])
-	energy_score = max(0, 1.5 - (energy_diff * 1.5))
+	energy_score = max(0, 3.0 - (energy_diff * 3.0))
 	score += energy_score
 	
 	return score
