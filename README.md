@@ -29,6 +29,28 @@ Some prompts to answer:
 
 You can include a simple diagram or bullet list if helpful.
 
+1. This system implements **content-based filtering**, recommending songs similar to what the user prefers by comparing song features.
+  
+    Song: Stores `genre`, `mood`, `energy`, `tempo_bpm`, `valence`, `danceability`, and `acousticness` for each track.
+
+    UserProfile: Stores preferred `genre`, `mood`, and target values for numerical features (`energy`, `tempo`, `valence`, `danceability`, `acousticness`).
+
+    Scoring: For each song, the recommender calculates a score by:
+      1. Matching categorical features (genre, mood)
+      2. Rewarding numerical features close to user preferences: `1 - |user_preference - song_value|`
+      3. Combining all scores with weights reflecting feature importance
+
+    Recommendation: Ranks songs by score and recommends the top matches.
+  2. 
+  **Algorithm Recipe**
+  - Genre Match: **+2.0 points** (highest weight)
+  - Mood Match: **+1.0 point**
+  - Energy Similarity: **+0 to 1.5 points** based on distance: `1.5 × (1 - |song.energy - user.energy|)`
+  
+  **Potential Biases**
+  
+  This system may over-prioritize genre matches, potentially ignoring songs that match the user's mood but are from a different genre. It also has limited diversity due to the small 20-song catalog and cannot account for listening context or recent history.
+
 ---
 
 ## Getting Started
