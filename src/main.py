@@ -5,11 +5,56 @@ This file helps you quickly run and test your recommender.
 
 You will implement the functions in recommender.py:
 - load_songs
-- score_song
 - recommend_songs
+- ScoringStrategy classes (EnergyFocusedStrategy, GenreFirstStrategy, MoodFirstStrategy, BalancedStrategy)
 """
 
-from recommender import load_songs, recommend_songs
+from recommender import (
+	load_songs, 
+	recommend_songs,
+	EnergyFocusedStrategy,
+	GenreFirstStrategy,
+	MoodFirstStrategy,
+	BalancedStrategy
+)
+
+try:
+	from tabulate import tabulate
+	HAS_TABULATE = True
+except ImportError:
+	HAS_TABULATE = False
+
+
+def print_recommendations_table(recommendations, title="Recommendations"):
+	"""
+	Display recommendations in a formatted table using tabulate.
+	
+	Args:
+		recommendations: List of (song, score, explanation) tuples
+		title: Title for the table
+	"""
+	if not recommendations:
+		print("No recommendations found.")
+		return
+	
+	# Prepare table data
+	table_data = []
+	for i, rec in enumerate(recommendations, 1):
+		song, score, explanation = rec
+		table_data.append([
+			i,
+			song['title'],
+			song['artist'],
+			song['genre'],
+			f"{score:.2f}",
+			explanation
+		])
+	
+	headers = ["#", "Title", "Artist", "Genre", "Score", "Reason"]
+	
+	print(f"\n{title}")
+	print(tabulate(table_data, headers=headers, tablefmt="grid"))
+
 
 
 def main() -> None:
@@ -18,16 +63,32 @@ def main() -> None:
     # Starter example profile
     user_prefs = {"genre": "pop", "mood": "happy", "energy": 0.8}
 
-    recommendations = recommend_songs(user_prefs, songs, k=5)
+    # Available scoring strategies
+    strategies = [
+        EnergyFocusedStrategy(),
+        GenreFirstStrategy(),
+        MoodFirstStrategy(),
+        BalancedStrategy()
+    ]
 
-    print("\nTop recommendations:\n")
-    for rec in recommendations:
-        # You decide the structure of each returned item.
-        # A common pattern is: (song, score, explanation)
-        song, score, explanation = rec
-        print(f"{song['title']} - Score: {score:.2f}")
-        print(f"Because: {explanation}")
-        print()
+    print("\n" + "="*70)
+    print("MUSIC RECOMMENDER SIMULATION - MULTIPLE STRATEGIES")
+    print("="*70)
+    print(f"\nUser Profile: {user_prefs}")
+    print(f"(Genre: {user_prefs['genre']}, Mood: {user_prefs['mood']}, Energy: {user_prefs['energy']})\n")
+
+    # Test each strategy
+    for strategy in strategies:
+        print("\n" + "="*100)
+        print(f"STRATEGY: {strategy.get_name()}")
+        print("="*100)
+        recommendations = recommend_songs(user_prefs, songs, k=5, strategy=strategy)
+
+        print_recommendations_table(recommendations, f"Top 5 recommendations (without diversity penalty)")
+        
+        # Show same strategy WITH diversity penalty
+        recommendations_diverse = recommend_songs(user_prefs, songs, k=5, strategy=strategy, use_diversity_penalty=True)
+        print_recommendations_table(recommendations_diverse, f"Top 5 recommendations (WITH diversity penalty)")
 
     # Define regular user preference profiles
     regular_profiles = {
@@ -95,38 +156,38 @@ def main() -> None:
         }
     }
 
-    # Test regular profiles
-    print("\n" + "="*60)
-    print("REGULAR USER PROFILES")
-    print("="*60)
+    # Test regular profiles with different strategies
+    print("\n\n" + "="*100)
+    print("REGULAR USER PROFILES - TESTED WITH ALL STRATEGIES")
+    print("="*100)
+    
     for profile_name, user_prefs in regular_profiles.items():
-        print(f"\n{profile_name}:")
-        recommendations = recommend_songs(user_prefs, songs, k=5)
-        print("\nTop recommendations:\n")
-        for rec in recommendations:
-            song, score, explanation = rec
-            print(f"  {song['title']} - Score: {score:.2f}")
-            print(f"  Because: {explanation}")
+        print(f"\n{'='*100}")
+        print(f"Profile: {profile_name} | Preferences: {user_prefs}")
+        print(f"{'='*100}")
+        
+        for strategy in strategies:
+            recommendations = recommend_songs(user_prefs, songs, k=3, strategy=strategy)
+            print_recommendations_table(recommendations, f"  [{strategy.get_name()}] Top 3")
 
     # Test edge case profiles
-    print("\n" + "="*60)
+    print("\n\n" + "="*100)
     print("EDGE CASE & ADVERSARIAL PROFILES")
-    print("="*60)
-    for profile_name, user_prefs in edge_case_profiles.items():
-        print(f"\n{'='*60}")
-        print(f"EDGE CASE: {profile_name}")
-        print(f"Preferences: {user_prefs}")
-        print(f"{'='*60}")
-        
-        recommendations = recommend_songs(user_prefs, songs, k=3)
-        
-        print("\nTop recommendations:\n")
-        for rec in recommendations:
-            song, score, explanation = rec
-            print(f"  {song['title']} - Score: {score:.2f}")
-            print(f"  By {song['artist']} ({song['genre']}, {song['mood']}, energy: {song['energy']})")
-            print(f"  Because: {explanation}")
-            print()
+    print("="*100)
+    
+    # Test one edge case with all strategies for comparison
+    test_edge_case = "Impossible Combo"
+    user_prefs = edge_case_profiles[test_edge_case]
+    
+    print(f"\n{'='*100}")
+    print(f"EDGE CASE: {test_edge_case}")
+    print(f"Preferences: {user_prefs}")
+    print(f"Challenge: No song has both rock + chill (rock is intense, lofi is chill)")
+    print(f"{'='*100}\n")
+    
+    for strategy in strategies:
+        recommendations = recommend_songs(user_prefs, songs, k=3, strategy=strategy)
+        print_recommendations_table(recommendations, f"[{strategy.get_name()}] Top 3")
 
 
 if __name__ == "__main__":
